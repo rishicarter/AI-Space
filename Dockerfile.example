@@ -1,0 +1,60 @@
+# Dockerfile for the AI-Space codebase
+# -------------------------------------------------
+# 1. Builder stage: install dependencies using uv
+# -------------------------------------------------
+FROM python:3.11-slim AS builder
+
+# Install minimal build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv (fast Python package installer)
+# ENV UV_VERSION=0.4.2
+# RUN curl -LsSf https://github.com/astral-sh/uv/releases/download/v${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin uv && chmod +x /usr/local/bin/uv
+# On macOS and Linux.
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Set working directory
+WORKDIR /app
+
+# Copy pyproject.toml (and lock file if present) to leverage Docker cache
+COPY pyproject.toml ./
+# If a uv.lock file exists, copy it as well
+# COPY uv.lock ./
+
+# Create an isolated virtual environment and install dependencies
+RUN uv venv .venv && . .venv/bin/activate && uv sync --no-dev
+
+# Copy the rest of the source code
+COPY . .
+
+# -------------------------------------------------
+# 2. Runtime stage: minimal image with only runtime deps
+# -------------------------------------------------
+FROM python:3.11-slim
+
+# Create non-root user for security
+RUN useradd --create-home appuser
+WORKDIR /app
+
+# Copy the virtual environment from builder
+COPY --from=builder /app/.venv .venv
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Copy application code (already present in builder, but copy again for clean slate)
+COPY --from=builder /app /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose any ports your service uses (adjust if needed)
+# EXPOSE 8000
+
+# Default command to run the application
+# Adjust the entrypoint based on how your app is structured:
+# - If `main.py` is the entry point: ["python", "main.py"]
+# - If using uvicorn for FastAPI: ["uvicorn", "app.api.routes:app", "--host", "0.0.0.0", "--port", "8000"]
+# Here we assume the project is run as a module:
+# ENTRYPOINT ["python", "-m", "main"]
+ENTRYPOINT ["uvicorn", "app.api.routes:app", "--host", "0.0.0.0", "--port", "8000"]

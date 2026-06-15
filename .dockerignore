@@ -1,0 +1,38 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.env
+.env.*
+uv.lock
+
+# Images
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+
+# PDFs
+*.pdf
+
+# Notebooks
+*.ipynb
+
+# Python cache
+**/__pycache__/
+
+# VSCode
+.vscode
+
+# Logs
+logs/
+*.log
+
+# Local test data
+data/
+samples/
+test_data/
