@@ -19,13 +19,13 @@ def load_faq_data():
 
     return documents
 
-def build_index(documents=None):
+def build_index(documents=None, text_fields=["question", "section", "answer"], keyword_fields=["course"]):
     if documents is None:
         documents = load_faq_data()
 
     index = Index(
-        text_fields=["question", "section", "answer"],
-        keyword_fields=["course"]
+        text_fields=text_fields,
+        keyword_fields=keyword_fields
     )
 
     index.fit(documents)

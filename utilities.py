@@ -10,5 +10,7 @@ def calculate_llm_price(input_tokens, output_tokens, model_name="Unknown", input
         "input_cost": input_cost,
         "output_cost": output_cost,
         "total_cost": total_cost,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
         "model_name": model_name
     }
