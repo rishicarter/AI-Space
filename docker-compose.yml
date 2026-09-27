@@ -1,0 +1,17 @@
+services: 
+  chroma:
+    image: chromadb/chroma:1.5.3
+    container_name: solar-support-chroma
+    restart: unless-stopped
+    ports: 
+      - "127.0.0.1:8000:8000/"
+    volumes: 
+      - solar_chroma_data:/data 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 10s 
+      timeout: 5s 
+      retries: 12 
+volumes:
+  solar_chroma_data: 
+    name: solar_support_chroma_data
